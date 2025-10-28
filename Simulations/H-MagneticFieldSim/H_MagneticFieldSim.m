@@ -43,6 +43,13 @@ Calculate Heq Magnetic field strength at earths equator
         i_rad = deg2rad(i_deg);
         u0_rad = deg2rad(u0_deg);
 
-    %calculate mean motion based on (NASA Fundamentals of Orbital Mechanics
-    %Ch 7 eq (7-47))
+    %calculate mean motion (movement of satellite through u in rad/s) based on (NASA Fundamentals of Orbital Mechanics
+    %Ch 7 eq (7-47)) 
  n = sqrt((muEarth)/(a^3));
+  
+    %calculate orbital period (s)
+ T = ((2*pi)/n);
+
+    
+
+ 

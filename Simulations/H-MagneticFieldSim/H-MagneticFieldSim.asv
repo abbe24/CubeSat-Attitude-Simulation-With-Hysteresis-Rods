@@ -15,4 +15,14 @@ alt = 400;
 a = Re + alt;
     %inclination in degrees (based on ISS inclination)
 i_deg = 55.0; 
-    %
+    %initial argument of latitude in degrees
+u0_deg = 0.0;
+    %Calculate Heq Magnetic field strength at earths equator
+        %Earths horizontal field intensity in nanoTesla based on NOAA data
+        %(8/1/2026),(LAT 0, LONG 0, ALT 400km)(Ho
+    Beq = 
+   
+% Convert inclination and initial argument of latitude to radians
+    i_rad = deg2rad(i_deg);
+    u0_rad = deg2rad(u0_deg);
+

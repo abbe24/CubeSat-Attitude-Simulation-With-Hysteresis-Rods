@@ -82,6 +82,6 @@ t = linspace(0, T, N);
 u = u0_rad + n .* t;
 
 %Eqs (17),(18), and (19) from Gerhardt
-H1 = 3Heq * sin(i_rad) * cos(i_rad) * ((sin(u))^2);
-H2 = -3Heq * sin(i_rad) * sin(u) * cos(u);
-H3 = Heq(1 - 3((sin(i_rad))^2) * ((sin(u))^2));
+H1 = 3 * Heq * sin(i_rad) * cos(i_rad) .* (sin(u).^2);
+H2 = -3 * Heq * sin(i_rad) .* sin(u) .* cos(u);
+H3 = Heq * (1 - 3 * (sin(i_rad).^2) .* (sin(u).^2));

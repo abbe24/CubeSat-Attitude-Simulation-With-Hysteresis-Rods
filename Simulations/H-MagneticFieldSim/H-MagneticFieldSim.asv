@@ -15,11 +15,4 @@ alt = 400;
 a = Re + alt;
     %inclination in degrees (based on ISS inclination)
 i_deg = 55.0; 
-    %initial argument of latitude in degrees
-u0_deg = 0.0;
     %
-
-% Convert inclination and initial argument of latitude to radians
-    i_rad = deg2rad(i_deg);
-    u0_rad = deg2rad(u0_deg);
-

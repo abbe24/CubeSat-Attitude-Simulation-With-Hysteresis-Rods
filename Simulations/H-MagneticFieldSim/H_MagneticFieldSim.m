@@ -82,6 +82,26 @@ t = linspace(0, T, N);
 u = u0_rad + n .* t;
 
 %Eqs (17),(18), and (19) from Gerhardt
+
+% 3 magnetic field components in Orbit-Frame 
+
+% H1 = Radial Earth Magnetic Field Component
 H1 = 3 * Heq * sin(i_rad) * cos(i_rad) .* (sin(u).^2);
+% H2 = Tangential Earth Magnetic Field Component
 H2 = -3 * Heq * sin(i_rad) .* sin(u) .* cos(u);
+% H3 = Orbit normal (orthogonal to H1 & H2) (up or down)
 H3 = Heq * (1 - 3 * (sin(i_rad).^2) .* (sin(u).^2));
+
+% -------------------------------------------------------------------------
+% Plot results
+% -------------------------------------------------------------------------
+
+figure;
+plot(rad2deg(u), H1, 'r', 'LineWidth', 1.5); hold on;
+plot(rad2deg(u), H2, 'g', 'LineWidth', 1.5);
+plot(rad2deg(u), H3, 'b', 'LineWidth', 1.5);
+xlabel('Argument of Latitude u [deg]');
+ylabel('Magnetic Field Strength H [A/m]');
+title('Magnetic Field Components (Orbit Frame) Along Circular Orbit (Gerhardt Eq. 17–19)');
+legend('H_1 (Radial Field Strength)','H_2 (Tangential Field Strength','H_3 (Normal Field Strenth)');
+grid on;

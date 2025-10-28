@@ -72,10 +72,37 @@ T = (2 * pi) / n;
 %-------------------------------------------------------------------------  
 
     %Number of time steps
- N = 1000;
+N = 1000;
     %linspace(linearly spaced vector), linspace(x1,x2,N) creats a vector of
     %N evenly spaced points between x1 and x2. Takes 1000 time steps
     %between time 0 and end of an orbit
- t = linspace(0, T, N);
+t = linspace(0, T, N);
     %simulate argument of latitude for N(1000) evenly spaced time steps in
-    %orbit. initial argument of latitude + mean motion X
+    %orbit. initial argument of latitude + (mean motion * time vector (1000 elements))
+u = u0_rad + n .* t;
+
+%Eqs (17),(18), and (19) from Gerhardt
+
+% 3 magnetic field components in Orbit-Frame 
+
+% H1 = Radial Earth Magnetic Field Component
+H1 = 3 * Heq * sin(i_rad) * cos(i_rad) .* (sin(u).^2);
+% H2 = Tangential Earth Magnetic Field Component
+H2 = -3 * Heq * sin(i_rad) .* sin(u) .* cos(u);
+% H3 = Orbit normal (orthogonal to H1 & H2) (up or down)
+H3 = Heq * (1 - 3 * (sin(i_rad).^2) .* (sin(u).^2));
+
+%DO NOT UNDERSTAND PAST LINE 95 UNFINISHED
+% -------------------------------------------------------------------------
+% Plot results
+% -------------------------------------------------------------------------
+
+figure;
+plot(rad2deg(u), H1, 'r', 'LineWidth', 1.5); hold on;
+plot(rad2deg(u), H2, 'g', 'LineWidth', 1.5);
+plot(rad2deg(u), H3, 'b', 'LineWidth', 1.5);
+xlabel('Argument of Latitude u [deg]');
+ylabel('Magnetic Field Strength H [A/m]');
+title('Magnetic Field Components Along Circular Orbit (Gerhardt Eq. 17–19)');
+legend('H_1 (Radial Field Strength)','H_2 ','H_3');
+grid on;

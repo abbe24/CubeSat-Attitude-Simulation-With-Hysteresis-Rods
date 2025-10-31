@@ -72,7 +72,7 @@ T = (2 * pi) / n;
 %-------------------------------------------------------------------------  
 
     %Number of time steps
-N = 1000;
+N = 360;
     %linspace(linearly spaced vector), linspace(x1,x2,N) creats a vector of
     %N evenly spaced points between x1 and x2. Takes 1000 time steps
     %between time 0 and end of an orbit
@@ -92,6 +92,29 @@ H2 = -3 * Heq * sin(i_rad) .* sin(u) .* cos(u);
 % H3 = Orbit normal (orthogonal to H1 & H2) (up or down)
 H3 = Heq * (1 - 3 * (sin(i_rad).^2) .* (sin(u).^2));
 
+% B = magnetic field strength based on H1,H2,H3 magnetic field components
+B1 = FREESPACEPERMIABILITY * H1;
+B2 = FREESPACEPERMIABILITY * H2;
+B3 = FREESPACEPERMIABILITY * H3;
+
+%Magnitude of magnetic flux density
+BMAG = sqrt((B1.^2) + (B2.^2) + (B3.^2));
+%Magnetic flux density in Microteslas
+BMAGMicroT = BMAG .* (10^6);
+
+% -------------------------------------------------------------------------
+% Calculate Constant p
+% -------------------------------------------------------------------------
+p = (1/Hc) * tan( (pi*Br) / (2*Bs) );
+
+% -------------------------------------------------------------------------
+% Calculate Derivaties of H
+% -------------------------------------------------------------------------
+
+dH1_du = 6 * Heq * sin(i_rad) * cos(i_rad) .* sin(u) .* cos(u);
+dH2_du = -3 * Heq * sin(i_rad) .* (sin(u).^2 - cos(u).^2);
+dH3_du = -6 * Heq * sin(i_rad) .* sin(u) .* cos(u);
+
 % -------------------------------------------------------------------------
 % Plot results
 % -------------------------------------------------------------------------
@@ -101,7 +124,16 @@ plot(rad2deg(u), H1, 'r', 'LineWidth', 1.5); hold on;
 plot(rad2deg(u), H2, 'g', 'LineWidth', 1.5);
 plot(rad2deg(u), H3, 'b', 'LineWidth', 1.5);
 xlabel('Argument of Latitude u [deg]');
-ylabel('Magnetic Field Strength H [A/m]');
+ylabel('Magnetic Field strength H [A/m]');
 title('Magnetic Field Components (Orbit Frame) Along Circular Orbit (Gerhardt Eq. 17–19)');
 legend('H_1 (Radial Field Strength)','H_2 (Tangential Field Strength','H_3 (Normal Field Strenth)');
 grid on;
+
+%Plot Magnetic Flux density BMAG against argument of latitude u
+
+figure; 
+plot(rad2deg(u), BMAGMicroT, 'r', "LineWidth",1.5); hold on;
+xlabel('Argument of Latitude u [deg]');
+ylabel('Magnetic Flux Density muT (microTeslas)');
+grid on;
+

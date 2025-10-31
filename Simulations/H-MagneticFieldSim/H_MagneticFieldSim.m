@@ -9,13 +9,22 @@ simulation assumes a circular orbit.
 clear; clc; close all;
 
 %-------------------------------------------------------------------------
-%define constants
+% Define constants
 %-------------------------------------------------------------------------
     %permiability of free space (Mu(sub0))
 FREESPACEPERMIABILITY = ((4)*pi) * (10^(-7));
 
+% -------------------------------------------------------------------------
+% Define magnetic hysteresis parameters
+% -------------------------------------------------------------------------
+
+    % These values refer to the Appraent values found from Gerhardt
+Hc = 12;
+Br = 0.004;
+Bs = 0.025;
+
 %-------------------------------------------------------------------------
-%defined orbital parameters
+% Defined orbital parameters
 %-------------------------------------------------------------------------
 
     %Earth's average radius in km
@@ -26,7 +35,7 @@ alt = 400;
 a = Re + alt;
 
     %inclination in degrees (based on ISS inclination)
-i_deg = 55.0; 
+i_deg = 51.6; 
     %initial argument of latitude in degrees
 u0_deg = 0.0;
 
@@ -125,8 +134,8 @@ plot(rad2deg(u), H2, 'g', 'LineWidth', 1.5);
 plot(rad2deg(u), H3, 'b', 'LineWidth', 1.5);
 xlabel('Argument of Latitude u [deg]');
 ylabel('Magnetic Field strength H [A/m]');
-title('Magnetic Field Components (Orbit Frame) Along Circular Orbit (Gerhardt Eq. 17–19)');
-legend('H_1 (Radial Field Strength)','H_2 (Tangential Field Strength','H_3 (Normal Field Strenth)');
+title('Magnetic Field Strength Components (ECEF Frame) Along Circular Orbit (Gerhardt Eq. 17–19)');
+legend('H_1 (x)','H_2 (y','H_3 (z)');
 grid on;
 
 %Plot Magnetic Flux density BMAG against argument of latitude u
@@ -136,4 +145,3 @@ plot(rad2deg(u), BMAGMicroT, 'r', "LineWidth",1.5); hold on;
 xlabel('Argument of Latitude u [deg]');
 ylabel('Magnetic Flux Density muT (microTeslas)');
 grid on;
-

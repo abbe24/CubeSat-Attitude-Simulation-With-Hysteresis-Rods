@@ -9,13 +9,22 @@ simulation assumes a circular orbit.
 clear; clc; close all;
 
 %-------------------------------------------------------------------------
-%define constants
+% Define constants
 %-------------------------------------------------------------------------
     %permiability of free space (Mu(sub0))
 FREESPACEPERMIABILITY = ((4)*pi) * (10^(-7));
 
+% -------------------------------------------------------------------------
+% Define magnetic hysteresis parameters
+% -------------------------------------------------------------------------
+
+    % These values refer to the Appraent values found from Gerhardt
+Hc = 12;
+Br = 0.004;
+Bs = 0.025;
+
 %-------------------------------------------------------------------------
-%defined orbital parameters
+% Defined orbital parameters
 %-------------------------------------------------------------------------
 
     %Earth's average radius in km
@@ -105,3 +114,17 @@ ylabel('Magnetic Field Strength H [A/m]');
 title('Magnetic Field Components (Orbit Frame) Along Circular Orbit (Gerhardt Eq. 17–19)');
 legend('H_1 (Radial Field Strength)','H_2 (Tangential Field Strength','H_3 (Normal Field Strenth)');
 grid on;
+
+% -------------------------------------------------------------------------
+% Calculate Constant p
+% -------------------------------------------------------------------------
+p = (1/Hc) * tan( (pi*Br) / (2*Bs) );
+
+% -------------------------------------------------------------------------
+% Calculate Derivaties of H
+% -------------------------------------------------------------------------
+
+dH1_du = 6 * Heq * sin(i_rad) * cos(i_rad) .* sin(u) .* cos(u);
+dH2_du = -3 * Heq * sin(i_rad) .* (sin(u).^2 - cos(u).^2);
+dH3_du = -6 * Heq * sin(i_rad) .* sin(u) .* cos(u);
+

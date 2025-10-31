@@ -26,7 +26,7 @@ alt = 400;
 a = Re + alt;
 
     %inclination in degrees (based on ISS inclination)
-i_deg = 55.0; 
+i_deg = 51.6; 
     %initial argument of latitude in degrees
 u0_deg = 0.0;
 

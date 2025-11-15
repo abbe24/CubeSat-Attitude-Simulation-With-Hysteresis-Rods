@@ -104,24 +104,16 @@ wz = x(:,6);
 
 %plot Euler Angles 
 figure;
-plot(t,rad2deg(phi), 'LineWidth', 1.2); hold on;
-plot(t,rad2deg(theta), 'LineWidth', 1.2); hold on;
-plot(t,rad2deg(psi), 'LineWidth', 1.2); hold on;
-
-xlabel('time(s)');
-ylabel('Euler Angles (deg)');
-legend ('\phi (roll)', '\theta (pitch)', '\psi(Yaw)')
-title('3-2-1 Euler Angles - Free Tumble')
+plot(t,rad)
 %Plot Angular Velocities
 figure;
 plot(t, rad2deg(wx), 'LineWidth',1.2); hold on;
 plot(t, rad2deg(wy), 'LineWidth',1.2); hold on;
 plot(t, rad2deg(wz), 'LineWidth',1.2); hold on;
-
 xlabel('Time (s)');
 ylabel('Angular Velocity (deg/s)');
 legend('\omega_x', '\omega_y', '\omega_z');
-title("Angular Velocities - Free Tumble - ODE45");
+title("Cubesat Tumbleing - ODE45");
 grid on;
 
 

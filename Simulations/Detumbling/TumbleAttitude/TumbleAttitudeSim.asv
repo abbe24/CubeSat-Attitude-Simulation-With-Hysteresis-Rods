@@ -1,3 +1,5 @@
+function dydt = TumbleAttitudeSim(t,y,I)
+
 %{
 
 QUESTIONS: Euler angle rates vs. Angular Velocities?, Body Fixed Frame vs
@@ -61,12 +63,14 @@ start_time = datetime(2026,8,1,0,0,0);
 end_time = datetime(2026,8,2,0,0,0);
 
 timestep = 1;
-t_seconds = 0:dt:86400;
+t_seconds = 0:timestep:86400;
 
 %%Cubesat Moments of Inertia (kg*m^2)
 Ixx = 0.02552;
 Iyy = 0.02552;
 Izz = 0.02552;
+%Intertia column vector
+I = [Ixx,Iyy,Izz];
 
 %initial conditions for Attitude and Angular Velocity
 %Initial Euler angles around x, y, and z
@@ -74,16 +78,32 @@ wx0 = deg2rad(10);
 wy0 = deg2rad(5);
 wz0 = deg2rad(2);
 %Inital State Vector (LEARN EXACTLY WHAT A STATE VECTOR IS)
-state = [wx0;wy0;wz0];
+state0 = [wx0;wy0;wz0];
 
-%Initialize column vectors for angular velocities about each body fixed axis
-%zeros(columns, rows) zeros fills a matrix of defined size with zeros
-wx = zeros(length(t_seconds),1);
-wy = zeros(length(t_seconds),1);
-wz = zeros(length(t_seconds),1);
+%Choose settings for ODE45 solver 
+%(UNDERSTAND DORMAND-PRINCE pair of RUNGE-KUTTA FORMULA)
+%Set relative and absolute tolerance to 1e-8 because tight tolerances are
+%needed for accuraccy. 
+options = odeset('RelTol',1e-7,'AbsTol',1e-7);
 
-%set 1st step of angular velocity to initial condit
-wx(1)
+%Run ODE45
+%
+[t,Att] = ode45(@(t,y) TumbleAttitudeSim(t,y,I), t_seconds, state0, options);
 
+%set 1st step of angular velocity to initial condition
+wx = Att(:,1);
+wy = Att(:,1);
+wz = Att(:,1);
+
+%Plot Angular Velocities
+figure;
+plot(t, rad2deg(wx), 'LineWidth',1.2); hold on;
+plot(t, rad2deg(wy), 'LineWidth',1.2); hold on;
+plot(t, rad2deg(wz), 'LineWidth',1.2); hold on;
+xlabel('Time (s)');
+ylabel('Angular Velocity (deg/s)');
+legend('\omega_x', '\omega_y', '\omega_z');
+title("Cubesat Tumbleing - ODE45");
+grid on;
 
 

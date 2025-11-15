@@ -61,7 +61,7 @@ start_time = datetime(2026,8,1,0,0,0);
 end_time = datetime(2026,8,2,0,0,0);
 
 timestep = 1;
-t_seconds = 0:dt:86400;
+t_seconds = 0:timestep:86400;
 
 %%Cubesat Moments of Inertia (kg*m^2)
 Ixx = 0.02552;
@@ -77,13 +77,31 @@ wy0 = deg2rad(5);
 wz0 = deg2rad(2);
 %Inital State Vector (LEARN EXACTLY WHAT A STATE VECTOR IS)
 state0 = [wx0;wy0;wz0];
+
 %Choose settings for ODE45 solver 
+%(UNDERSTAND DORMAND-PRINCE pair of RUNGE-KUTTA FORMULA)
+%Set relative and absolute tolerance to 1e-8 because tight tolerances are
+%needed for accuraccy. 
+options = odeset('RelTol',1e-7,'AbsTol',1e-7);
 
-%set 1st step of angular velocity to initial condition
-wx(1) = wx0;
-wy(1) = wy0;
-wz(1) = wz0;
-
+%Run ODE45
 %
+[t,Att] = ode45(@(t,y) FreeTumble(t,y,I), t_seconds, state0, options);
+
+%extract angular velocities from ODE45
+wx = Att(:,1);
+wy = Att(:,2);
+wz = Att(:,3);
+
+%Plot Angular Velocities
+figure;
+plot(t, rad2deg(wx), 'LineWidth',1.2); hold on;
+plot(t, rad2deg(wy), 'LineWidth',1.2); hold on;
+plot(t, rad2deg(wz), 'LineWidth',1.2); hold on;
+xlabel('Time (s)');
+ylabel('Angular Velocity (deg/s)');
+legend('\omega_x', '\omega_y', '\omega_z');
+title("Cubesat Tumbleing - ODE45");
+grid on;
 
 

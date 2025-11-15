@@ -19,13 +19,12 @@ Izz = I(3);
 
 % 3-2-1 Euler Angle Kinematics (find a source to explain)
 phi_dot = wx + wy * sin(phi) * tan(theta) + wz * cos(phi) * tan(theta);
-theta_dot = wy * cos(phi) - wz * sin(phi);
-psi_dot = (wy * sin(phi) + wz * cos(phi)) / cos(theta);
+theta_dot = wy * cos(phi) - wz * sin(phi)
 
 % Euler rotational equations (no torques)
 wx_dot = ((Iyy - Izz)/Ixx) * wy * wz;
 wy_dot = ((Izz - Ixx)/Iyy) * wz * wx;
 wz_dot = ((Ixx - Iyy)/Izz) * wx * wy;
 
-dydt = [phi_dot; theta_dot; psi_dot; wx_dot; wy_dot; wz_dot];
+dydt = [wx_dot; wy_dot; wz_dot];
 end

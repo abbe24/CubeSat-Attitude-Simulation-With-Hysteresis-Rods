@@ -90,7 +90,7 @@ options = odeset('RelTol',1e-7,'AbsTol',1e-7);
 
 %Run ODE45
 %
-[t,Att] = ode45(@(t,x) FreeTumble(t,x,I), t_seconds, state0, options);
+[t,x] = ode45(@(t,x) FreeTumble(t,x,I), t_seconds, state0, options);
 
 %extract Euler angles form ODE45
 phi = x(:,1);
@@ -124,4 +124,52 @@ legend('\omega_x', '\omega_y', '\omega_z');
 title("Angular Velocities - Free Tumble - ODE45");
 grid on;
 
+%--------------------------------------------------------------------------
+% Extract Euler angles and Euler Angle Rates for attitude file in STK
+%--------------------------------------------------------------------------
 
+%define time format
+timestrings = datestr(start_time + seconds(t), 'yyyy-mm-ddTHH:MM:SS.FFF');
+
+%convert Euler angles to degrees
+phi_deg = rad2deg(phi);
+theta_deg = rad2deg(theta);
+psi_deg = rad2deg(psi);
+
+%convers Euler rates to degrees
+wx_deg = rad2deg(wx);
+wy_deg = rad2deg(wy);
+wz_deg = rad2deg(wz);
+
+%number of attitude points = number of seconds
+N = length(t);
+
+%create .a file and open it to write
+filename = 'GASRATSAttitude.a';
+fid = fopen(filename, 'w');
+
+%write header
+fprintf(fid, 'stk.v.12.5\n');
+fprintf(fid, 'BeginAttitude\n');
+fprintf(fid, 'NumberOfAttitudePoints   %d\n', N);
+fprintf(fid, 'Sequence                 321\n');
+fprintf(fid, 'AttitudeTimeScale        UTCG\n');
+fprintf(fid, 'BeginAngles\n');
+
+%go through all timesteps "k" and write data into .a file
+for k = 1:N
+    fprintf(fid, '%s   %.6f   %.6f   %.6f   %.6f   %.6f   %.6f\n', ...
+        timestrings(k,:), ...
+        phi_deg(k), theta_deg(k), psi_deg(k), ...
+        wx_deg(k), wy_deg(k), wz_deg(k));
+end
+
+%write end of file text in .a file
+fprintf(fid, 'EndAngles\n');
+fprintf(fid, 'EndAttitude\n');
+
+%close file
+fclose(fid);
+
+%print command line statement confirming file was created
+disp("Generated STK attitude file: " + filename);

@@ -51,10 +51,39 @@ opts = setvaropts(opts, "Time_UTCG_", "EmptyFieldRule", "auto");
 % Import the data
 ZARYA_25544OrbitLocationAndMagneticFlux = readtable("C:\GAS\ADCSGITHUB\Simulations\Detumbling\TumbleAttitude\ZARYA_25544 Orbit Location and Magnetic Flux.csv", opts);
 
-
 %% Clear temporary variables
 clear opts
 
 %--------------------------------------------------------------------------
+
+%simulation conditions (start, end, timestep, length)
+start_time = datetime(2026,8,1,0,0,0);
+end_time = datetime(2026,8,2,0,0,0);
+
+timestep = 1;
+t_seconds = 0:dt:86400;
+
+%%Cubesat Moments of Inertia (kg*m^2)
+Ixx = 0.02552;
+Iyy = 0.02552;
+Izz = 0.02552;
+%Intertia column vector
+I = [Ixx,Iyy,Izz];
+
+%initial conditions for Attitude and Angular Velocity
+%Initial Euler angles around x, y, and z
+wx0 = deg2rad(10);
+wy0 = deg2rad(5);
+wz0 = deg2rad(2);
+%Inital State Vector (LEARN EXACTLY WHAT A STATE VECTOR IS)
+state0 = [wx0;wy0;wz0];
+%Choose settings for ODE45 solver 
+
+%set 1st step of angular velocity to initial condition
+wx(1) = wx0;
+wy(1) = wy0;
+wz(1) = wz0;
+
+%
 
 

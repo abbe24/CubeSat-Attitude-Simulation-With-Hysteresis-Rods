@@ -124,25 +124,32 @@ legend('\omega_x', '\omega_y', '\omega_z');
 title("Angular Velocities - Free Tumble - ODE45");
 grid on;
 
+%UNDERSTAND DIFFERENCE BETWEEN EULER ANGLE RATES AND ANGULAR VELOCITY
+
 %--------------------------------------------------------------------------
 % Extract Euler angles and Euler Angle Rates for attitude file in STK
 %--------------------------------------------------------------------------
-
-%define time format
-timestrings = datestr(start_time + seconds(t), 'yyyy-mm-ddTHH:MM:SS.FFF');
 
 %convert Euler angles to degrees
 phi_deg = rad2deg(phi);
 theta_deg = rad2deg(theta);
 psi_deg = rad2deg(psi);
 
+%calculate 3-2-1Euler Rates (phidot,thetadot,psidot)
+phi_dot   = wx + wy.*sin(phi).*tan(theta) + wz.*cos(phi).*tan(theta);
+theta_dot = wy.*cos(phi) - wz.*sin(phi);
+psi_dot   = (wy.*sin(phi) + wz.*cos(phi)) ./ cos(theta);
+
 %convers Euler rates to degrees
-wx_deg = rad2deg(wx);
-wy_deg = rad2deg(wy);
-wz_deg = rad2deg(wz);
+phi_dot_deg = rad2deg(phi_dot);
+theta_dot_deg = rad2deg(theta_dot);
+psi_dot_deg = rad2deg(psi_dot);
 
 %number of attitude points = number of seconds
 N = length(t);
+
+% STK requires time offsets, not timestamps
+timeOffsets = t;   % already 0:1:86400
 
 %create .a file and open it to write
 filename = 'GASRATSAttitude.a';
@@ -152,16 +159,19 @@ fid = fopen(filename, 'w');
 fprintf(fid, 'stk.v.12.5\n');
 fprintf(fid, 'BeginAttitude\n');
 fprintf(fid, 'NumberOfAttitudePoints   %d\n', N);
+fprintf(fid, 'BlockingFactor           1\n');
+fprintf(fid, 'InterpolationOrder       1\n');
 fprintf(fid, 'Sequence                 321\n');
 fprintf(fid, 'AttitudeTimeScale        UTCG\n');
+fprintf(fid,'Epoch                    %s\n',datestr(start_time,'yyyy-mm-ddTHH:MM:SS.FFF'));
 fprintf(fid, 'BeginAngles\n');
 
 %go through all timesteps "k" and write data into .a file
 for k = 1:N
     fprintf(fid, '%s   %.6f   %.6f   %.6f   %.6f   %.6f   %.6f\n', ...
         timestrings(k,:), ...
-        phi_deg(k), theta_deg(k), psi_deg(k), ...
-        wx_deg(k), wy_deg(k), wz_deg(k));
+        psi_deg(k), theta_deg(k), phi_deg(k), ...
+        psi_dot_deg(k), theta_dot_deg(k), phi_dot_deg(k));
 end
 
 %write end of file text in .a file

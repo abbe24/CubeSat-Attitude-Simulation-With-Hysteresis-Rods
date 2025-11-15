@@ -80,7 +80,7 @@ wx0 = deg2rad(10);
 wy0 = deg2rad(5);
 wz0 = deg2rad(2);
 %Inital State Vector 
-state0 = [phi0; theta0; psi0; wx0;wy0;wz0];
+state0 = [phi0; theta0; psi0; wx0; wy0; wz0];
 
 %Choose settings for ODE45 solver 
 %(UNDERSTAND DORMAND-PRINCE pair of RUNGE-KUTTA FORMULA)
@@ -89,7 +89,6 @@ state0 = [phi0; theta0; psi0; wx0;wy0;wz0];
 options = odeset('RelTol',1e-7,'AbsTol',1e-7);
 
 %Run ODE45
-%
 [t,x] = ode45(@(t,x) FreeTumble(t,x,I), t_seconds, state0, options);
 
 %extract Euler angles form ODE45
@@ -102,6 +101,21 @@ wx = x(:,4);
 wy = x(:,5);
 wz = x(:,6);
 
+%convert Euler angles to degrees
+phi_deg = rad2deg(phi);
+theta_deg = rad2deg(theta);
+psi_deg = rad2deg(psi);
+
+%calculate 3-2-1Euler Rates (phidot,thetadot,psidot)
+phi_dot   = wx + wy.*sin(phi).*tan(theta) + wz.*cos(phi).*tan(theta);
+theta_dot = wy.*cos(phi) - wz.*sin(phi);
+psi_dot   = (wy.*sin(phi) + wz.*cos(phi)) ./ cos(theta);
+
+%convers Euler rates to degrees
+phi_dot_deg = rad2deg(phi_dot);
+theta_dot_deg = rad2deg(theta_dot);
+psi_dot_deg = rad2deg(psi_dot);
+
 %plot Euler Angles 
 figure;
 plot(t,rad2deg(phi), 'LineWidth', 1.2); hold on;
@@ -112,6 +126,19 @@ xlabel('time(s)');
 ylabel('Euler Angles (deg)');
 legend ('\phi (roll)', '\theta (pitch)', '\psi(Yaw)')
 title('3-2-1 Euler Angles - Free Tumble')
+
+%plot Euler Angle Rates
+figure;
+plot(t, phi_dot_deg, 'LineWidth', 1.2); hold on;
+plot(t, theta_dot_deg, 'LineWidth', 1.2); hold on;
+plot(t, psi_dot_deg, 'LineWidth', 1.2); hold on;
+
+xlabel('Time (s)');
+ylabel('Euler Angle Rates (deg/s)');
+legend('\phi_dot', '\theta_dot','\psi_dot');
+title('3-2-1 Euler Angle Rates - Free Tumble');
+grid on;
+
 %Plot Angular Velocities
 figure;
 plot(t, rad2deg(wx), 'LineWidth',1.2); hold on;
@@ -129,21 +156,6 @@ grid on;
 %--------------------------------------------------------------------------
 % Extract Euler angles and Euler Angle Rates for attitude file in STK
 %--------------------------------------------------------------------------
-
-%convert Euler angles to degrees
-phi_deg = rad2deg(phi);
-theta_deg = rad2deg(theta);
-psi_deg = rad2deg(psi);
-
-%calculate 3-2-1Euler Rates (phidot,thetadot,psidot)
-phi_dot   = wx + wy.*sin(phi).*tan(theta) + wz.*cos(phi).*tan(theta);
-theta_dot = wy.*cos(phi) - wz.*sin(phi);
-psi_dot   = (wy.*sin(phi) + wz.*cos(phi)) ./ cos(theta);
-
-%convers Euler rates to degrees
-phi_dot_deg = rad2deg(phi_dot);
-theta_dot_deg = rad2deg(theta_dot);
-psi_dot_deg = rad2deg(psi_dot);
 
 %number of attitude points = number of seconds
 N = length(t);
@@ -168,8 +180,8 @@ fprintf(fid, 'BeginAngles\n');
 
 %go through all timesteps "k" and write data into .a file
 for k = 1:N
-    fprintf(fid, '%s   %.6f   %.6f   %.6f   %.6f   %.6f   %.6f\n', ...
-        timeOffsets(k,:), ...
+    fprintf(fid, '%.3f   %.6f   %.6f   %.6f   %.6f   %.6f   %.6f\n', ...
+        timeOffsets(k), ...
         psi_deg(k), theta_deg(k), phi_deg(k), ...
         psi_dot_deg(k), theta_dot_deg(k), phi_dot_deg(k));
 end

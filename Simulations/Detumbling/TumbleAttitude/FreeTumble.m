@@ -27,5 +27,6 @@ wx_dot = ((Iyy - Izz)/Ixx) * wy * wz;
 wy_dot = ((Izz - Ixx)/Iyy) * wz * wx;
 wz_dot = ((Ixx - Iyy)/Izz) * wx * wy;
 
+%compute the euler rates and angular accalerations
 dydt = [phi_dot; theta_dot; psi_dot; wx_dot; wy_dot; wz_dot];
 end

@@ -194,7 +194,6 @@ for k = 1:N
 end
 
 %write end of file text in .a file
-fprintf(fid, 'EndAngles\n');
 fprintf(fid, 'EndAttitude\n');
 
 %close file

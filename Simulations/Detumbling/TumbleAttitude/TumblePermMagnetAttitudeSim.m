@@ -1,7 +1,6 @@
 %{
 
-QUESTIONS: Euler angle rates vs. Angular Velocities?, Body Fixed Frame vs
-intertial Frame?
+QUESTIONS: Euler angle rates vs. Angular Velocities?
 
 The purpose of this simulation is to simulate a tumbling 1.5U cubesat for 100
 orbits starting on AUG 1 2026 00:00:00 based on initial angular velocities using the Newton-Euler rotational 
@@ -67,18 +66,21 @@ t_seconds = 0:timestep:86400;
 Ixx = 0.02552;
 Iyy = 0.02552;
 Izz = 0.02552;
+
 %Intertia column vector
 I = [Ixx,Iyy,Izz];
 
 %initial conditions for Attitude and Angular Velocity
 %Initial Euler angles
-phi0 = deg2rad(0);
-theta0 = deg2rad(0);
-psi0 = deg2rad(0);
+phi0 = deg2rad(0);  %Yaw
+theta0 = deg2rad(0);  %Pitch
+psi0 = deg2rad(0);  %Roll
+
 %initial angular velocities about x, y, and z
 wx0 = deg2rad(10);
 wy0 = deg2rad(5);
 wz0 = deg2rad(2);
+
 %Inital State Vector 
 state0 = [phi0; theta0; psi0; wx0; wy0; wz0];
 
@@ -92,14 +94,29 @@ options = odeset('RelTol',1e-7,'AbsTol',1e-7);
 [t,x] = ode45(@(t,x) FreeTumble(t,x,I), t_seconds, state0, options);
 
 %extract Euler angles form ODE45
-phi = x(:,1);
-theta = x(:,2);
-psi = x(:,3);
+phi = x(:,1); %Yaw - z
+theta = x(:,2); %Pitch - y
+psi = x(:,3); %Roll - x
 
 %extract angular velocities from ODE45
 wx = x(:,4);
 wy = x(:,5);
 wz = x(:,6);
+
+%convert Euler angles to degrees
+phi_deg = rad2deg(phi);
+theta_deg = rad2deg(theta);
+psi_deg = rad2deg(psi);
+
+%calculate 3-2-1Euler Rates (phidot,thetadot,psidot)
+phi_dot   = wx + wy.*sin(phi).*tan(theta) + wz.*cos(phi).*tan(theta);
+theta_dot = wy.*cos(phi) - wz.*sin(phi);
+psi_dot   = (wy.*sin(phi) + wz.*cos(phi)) ./ cos(theta);
+
+%convers Euler rates to degrees
+phi_dot_deg = rad2deg(phi_dot);
+theta_dot_deg = rad2deg(theta_dot);
+psi_dot_deg = rad2deg(psi_dot);
 
 %plot Euler Angles 
 figure;
@@ -119,7 +136,10 @@ plot(t, theta_dot_deg, 'LineWidth', 1.2); hold on;
 plot(t, psi_dot_deg, 'LineWidth', 1.2); hold on;
 
 xlabel('Time (s)');
-ylabel('Euler Angle Rates')
+ylabel('Euler Angle Rates (deg/s)');
+legend('\phi_dot', '\theta_dot','\psi_dot');
+title('3-2-1 Euler Angle Rates - Free Tumble');
+grid on;
 
 %Plot Angular Velocities
 figure;
@@ -139,21 +159,6 @@ grid on;
 % Extract Euler angles and Euler Angle Rates for attitude file in STK
 %--------------------------------------------------------------------------
 
-%convert Euler angles to degrees
-phi_deg = rad2deg(phi);
-theta_deg = rad2deg(theta);
-psi_deg = rad2deg(psi);
-
-%calculate 3-2-1Euler Rates (phidot,thetadot,psidot)
-phi_dot   = wx + wy.*sin(phi).*tan(theta) + wz.*cos(phi).*tan(theta);
-theta_dot = wy.*cos(phi) - wz.*sin(phi);
-psi_dot   = (wy.*sin(phi) + wz.*cos(phi)) ./ cos(theta);
-
-%convers Euler rates to degrees
-phi_dot_deg = rad2deg(phi_dot);
-theta_dot_deg = rad2deg(theta_dot);
-psi_dot_deg = rad2deg(psi_dot);
-
 %number of attitude points = number of seconds
 N = length(t);
 
@@ -165,20 +170,25 @@ filename = 'GASRATSAttitude.a';
 fid = fopen(filename, 'w');
 
 %write header
-fprintf(fid, 'stk.v.12.5\n');
-fprintf(fid, 'BeginAttitude\n');
-fprintf(fid, 'NumberOfAttitudePoints   %d\n', N);
-fprintf(fid, 'BlockingFactor           1\n');
-fprintf(fid, 'InterpolationOrder       1\n');
-fprintf(fid, 'Sequence                 321\n');
-fprintf(fid, 'AttitudeTimeScale        UTCG\n');
-fprintf(fid,'Epoch                    %s\n',datestr(start_time,'yyyy-mm-ddTHH:MM:SS.FFF'));
-fprintf(fid, 'BeginAngles\n');
+fprintf(fid, 'stk.v.12.0\n\n');
+fprintf(fid, '# WrittenBy    STK_v12.5.0\n\n');
+fprintf(fid, 'BEGIN Attitude\n\n');
+fprintf(fid, '  NumberOfAttitudePoints   %d\n\n', N);
+fprintf(fid, '  ScenarioEpoch            1 Aug 2026 00:00:00.000000\n\n');
+fprintf(fid, '  BlockingFactor           20\n\n'); %what does this do?
+fprintf(fid, '  InterpolationOrder       1\n\n');
+fprintf(fid, '  CentralBody              Earth\n\n');
+fprintf(fid, '# Epoch in JDate format:  2461253.50000000000000\n');
+fprintf(fid, '# Epoch in YYDDD format:	  26213.00000000000000\n\n\n');
+fprintf(fid, '# Time of first point: 1 Aug 2026 00:00:00.000000000 UTCG = 2461253.50000000000000 JDate = 26213.00000000000000 YYDDD\n\n');
+fprintf(fid, '  CoordinateAxes		 ICRF\n\n');
+fprintf(fid, '  Sequence 321\n');
+fprintf(fid, '  AttitudeTimeEulerAnglesAndRates\n');
 
 %go through all timesteps "k" and write data into .a file
 for k = 1:N
-    fprintf(fid, '%s   %.6f   %.6f   %.6f   %.6f   %.6f   %.6f\n', ...
-        timeOffsets(k,:), ...
+    fprintf(fid, '%.3f   %.6f   %.6f   %.6f   %.6f   %.6f   %.6f\n', ...
+        timeOffsets(k), ...
         psi_deg(k), theta_deg(k), phi_deg(k), ...
         psi_dot_deg(k), theta_dot_deg(k), phi_dot_deg(k));
 end

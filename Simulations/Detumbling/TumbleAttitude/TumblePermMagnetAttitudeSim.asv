@@ -81,12 +81,6 @@ wx0 = deg2rad(10);
 wy0 = deg2rad(5);
 wz0 = deg2rad(2);
 
-%convert earth magnetic field into B vector
-% Convert magnetic field data to a vector
-B = [ZARYA_25544OrbitLocationAndMagneticFlux.x_Magnitude, ...
-     ZARYA_25544OrbitLocationAndMagneticFlux.y_Magnitude, ...
-     ZARYA_25544OrbitLocationAndMagneticFlux.z_Magnitude];
-
 %Inital State Vector 
 state0 = [phi0; theta0; psi0; wx0; wy0; wz0];
 
@@ -176,11 +170,18 @@ filename = 'GASRATSAttitude.a';
 fid = fopen(filename, 'w');
 
 %write header
-fprintf(fid, 'stk.v.12.5\n');
-fprintf(fid, 'BeginAttitude\n');
-fprintf(fid, 'NumberOfAttitudePoints   %d\n', N);
-fprintf(fid, 'BlockingFactor           1\n');
-fprintf(fid, 'InterpolationOrder       1\n');
+fprintf(fid, 'stk.v.12.0\n\n');
+fprintf(fid, '# WrittenBy    STK_v12.5.0\n\n');
+fprintf(fid, 'BEGIN Attitude\n\n');
+fprintf(fid, 'NumberOfAttitudePoints   %d\n\n', N);
+fprintf(fid, 'ScenarioEpoch            1 Aug 2026 00:00:00.000000\n\n');
+fprintf(fid, 'BlockingFactor           20\n\n'); %what does this do?
+fprintf(fid, 'InterpolationOrder       1\n\n');
+fprintf(fid, 'CentralBody              Earth\n\n');
+fprintf(fid, '# Epoch in JDate format:  2461253.50000000000000\n');
+fprintf(fid, '# Epoch in YYDDD format:	  26213.00000000000000\n\n\n');
+fprintf(fid, '# Time of first point: 1 Aug 2026 00:00:00.000000000 UTCG = 2461253.50000000000000 JDate = 26213.00000000000000 YYDDD\n\n');
+fprintf(fid, 'CoordinateAxes\n');
 fprintf(fid, 'Sequence                 321\n');
 fprintf(fid, 'AttitudeTimeScale        UTCG\n');
 fprintf(fid,'Epoch                    %s\n',datestr(start_time,'yyyy-mm-ddTHH:MM:SS.FFF'));

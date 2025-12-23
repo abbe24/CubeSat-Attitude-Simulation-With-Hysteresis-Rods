@@ -1,0 +1,1 @@
+This folder contains past attempts to create a full simulation of the satellite rotational dynamics over a long period of time. These simulations attempt to take into account all torques due to: permanent magnets/Hysteresis Rods/Environmental torques. These simulations all use ODE 45 and have varying levels of accuracy based on the detail in our model of our torque sources. 

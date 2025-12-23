@@ -1,0 +1,3 @@
+These Folders Contain attempts to simulate Cubesat Attitude while tumbling using Euler Angles for rotational kinematics. 
+
+They take into account either no torque, or some of the torques that will be included in the final simualtions

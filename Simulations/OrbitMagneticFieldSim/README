@@ -1,0 +1,7 @@
+The purpose of this simulation was to calculate the Earth's Mangetic Flux density (H) for a circular orbit at a fixed altitude 
+similar to that of the ISS. This simulation sucessfully calculated a spreadsheet of Magnetic Flux Densities felt by the CubeSat
+in different parts of its orbit. 
+
+This simulation can be replaced by use of the Magnetic flux density based on the IGRF model data at orbit locations. This 
+replacement will be used for the final simulation as it is more accurate when compared to Magnetic Flux Densities felt by other 
+satellites in orbit.

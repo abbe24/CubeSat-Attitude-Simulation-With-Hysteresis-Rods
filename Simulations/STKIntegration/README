@@ -1,0 +1,1 @@
+This folder contains attempts to integrate the use of STK and Matlab for our simulations. This contains STK files to recieve ISS orbit and magnetic field data. As well as unfinished attempts to run STK simulations fully automatically from matlab. The .a Files are files which can be used in STK for the Attitude of a Sattelite object.

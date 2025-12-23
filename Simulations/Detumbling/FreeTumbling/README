@@ -1,0 +1,3 @@
+This Simulation models the attitude of our cubesat during tumbling taking into account no torques. Meaning this would be a cubesat with no magnets or hysteresis rods.
+
+This simulation will output a .a file which can be input into STK as an attitude file for a satellite object.

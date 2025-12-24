@@ -51,7 +51,7 @@ opts = setvaropts(opts, "Time_UTCG_", "EmptyFieldRule", "auto");
 
 % Import the data
 % FILEPATH MUST BE CHANGED BASED ON LOCATION OF ISS ORBIT AND MAGNEITC FIELD DATA
-GASRATSOrbitLocationAndMagneticFlux = readtable("C:\GAS\ADCSGITHUB\CubeSat-Attitude-Damping-Simulation-With-Hysteresis-Rods-main\Simulations\Detumbling\PermanentMagnetTorque\GASRATS Orbit Location and Magnetic Flux.csv", opts);
+GASRATSOrbitLocationAndMagneticFlux = readtable("C:\GAS\ADCSGITHUB\Simulations\Detumbling\PermanentMagnetTorque\GASRATS Orbit Location and Magnetic Flux.csv", opts);
 
 %% Clear temporary variables
 clear opts
@@ -88,6 +88,26 @@ wz0 = deg2rad(2);
 
 %Inital State Vector 
 state0 = [phi0; theta0; psi0; wx0; wy0; wz0];
+
+%%%%%%%%%%%%%%%%%%%%%Permanent Magnet Torque Calculation%%%%%%%%%%%%%%%%%%%
+
+
+
+%-----DELETE IF BROKEN-----------------------------------------------------
+
+%convert earth magnetic field into B vector
+B = [GASRATSOrbitLocationAndMagneticFlux.x_Magnitude, ...
+     GASRATSOrbitLocationAndMagneticFlux.y_Magnitude, ...
+     GASRATSOrbitLocationAndMagneticFlux.z_Magnitude];
+
+%Define Permanent Magnet Magnetic Moment Vector
+%mPerm = [0.3, 0, 0];
+
+
+%Calculate Torque based on Permanent magnet
+%T_Perm = cross(mPerm, B(t));
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Choose settings for ODE45 solver 
 %(UNDERSTAND DORMAND-PRINCE pair of RUNGE-KUTTA FORMULA)
@@ -227,24 +247,6 @@ wz = x(6);
 Ixx = I(1);
 Iyy = I(2);
 Izz = I(3);
-
-%%%%%%%%%%%%%%%%%%%%%Permanent Magnet Torque Calculation%%%%%%%%%%%%%%%%%%%
-
-
-
-%-----DELETE IF BROKEN-----------------------------------------------------
-
-%convert earth magnetic field into B vector
-B = [GASRATSOrbitLocationAndMagneticFlux.x_Magnitude, ...
-     GASRATSOrbitLocationAndMagneticFlux.y_Magnitude, ...
-     GASRATSOrbitLocationAndMagneticFlux.z_Magnitude];
-
-%Define Permanent Magnet Magnetic Moment Vector
-%mPerm = [0.3, 0, 0];
-
-
-%Calculate Torque based on Permanent magnet
-%T_Perm = cross(mPerm, B(t));
 
 %---------------------CALCULATE Permanent Magnet Torque--------------------
 

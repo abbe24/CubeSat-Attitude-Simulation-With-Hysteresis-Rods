@@ -101,11 +101,11 @@ B = [GASRATSOrbitLocationAndMagneticFlux.x_Magnitude, ...
      GASRATSOrbitLocationAndMagneticFlux.z_Magnitude];
 
 %Define Permanent Magnet Magnetic Moment Vector
-%mPerm = [0.3, 0, 0];
+%mPerm = [0.3, 0, 0]; %In Body fixed frame
 
 
 %Calculate Torque based on Permanent magnet
-%T_Perm = cross(mPerm, B(t));
+%T_Perm = cross(mP, B);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

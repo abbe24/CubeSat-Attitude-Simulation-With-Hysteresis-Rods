@@ -1,0 +1,5 @@
+This simulation models the detumbling of our cubesat taking into account only the torque from the permanent magnet. This simulation does not take into account environmental torques or torques due to hysteresis rods.
+
+
+This simulation will output a .a file which can be input into STK as an attitude file for a satellite object.
+The .csv file in this folder contains the Orbital Locations/ magnetic field data of the ISS over an orbital period

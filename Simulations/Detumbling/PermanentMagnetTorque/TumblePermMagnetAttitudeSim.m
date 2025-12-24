@@ -6,8 +6,9 @@ The purpose of this simulation is to simulate a tumbling 1U cubesat for 30
 days starting on AUG 1 2026 00:00:00 based on initial angular velocities using the Newton-Euler rotational 
 Equations of motion for rigid-bodies. 
 
-INPUTS: ISS Longitude Latitude Altitude ORBIT DATA (from STK), IGRF Magnetic flux density data
-(From STK), Moments of inertia of cubesat (IXX, IYY, IZZ), Initial Angular
+INPUTS: ISS Longitude Latitude Altitude ORBIT DATA (from STK)(in ECEF reference frame),
+IGRF Magnetic flux density data (From STK)(in ECEF reference frame), 
+Moments of inertia of cubesat (IXX, IYY, IZZ), Initial Angular
 Velocities (Wx, Wy, Wz), Initial Euler Angles (Phi, Theta, Psi).
 
 Outputs: Euler angles over 30 days (Phi, Theta, Psi), Euler angle rates
@@ -107,7 +108,7 @@ B = [GASRATSOrbitLocationAndMagneticFlux.x_Magnitude, ...
 %Calculate Torque based on Permanent magnet
 %T_Perm = cross(mP, B);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%ODE function call%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %Choose settings for ODE45 solver 
 %(UNDERSTAND DORMAND-PRINCE pair of RUNGE-KUTTA FORMULA)
@@ -138,10 +139,12 @@ phi_dot   = wx + wy.*sin(phi).*tan(theta) + wz.*cos(phi).*tan(theta);
 theta_dot = wy.*cos(phi) - wz.*sin(phi);
 psi_dot   = (wy.*sin(phi) + wz.*cos(phi)) ./ cos(theta);
 
-%convers Euler rates to degrees
+%convert Euler rates to degrees
 phi_dot_deg = rad2deg(phi_dot);
 theta_dot_deg = rad2deg(theta_dot);
 psi_dot_deg = rad2deg(psi_dot);
+
+%%%%%%%%%%%%%%%%%%%%%%% PLOTTING %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %plot Euler Angles 
 figure;

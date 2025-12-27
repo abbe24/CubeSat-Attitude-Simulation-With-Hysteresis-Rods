@@ -3,4 +3,4 @@ This is a Matlab simulation project in progress for the Utah State GASRATS satel
 
 The Matlab simulation file is named "cubesat_detumble5". This simulation projects a 1U cubesat given the initial conditions to lose at least 90% of its rotation velocity by 500 sec. The simulation was made using Euler’s rigid body rotational kinematics and dynamics equations. A gimball lock on the kinematic equations is required and implemented to prevent division by zero. A photo of the used kinematic and dynamic equations is provided for reference.
 
-The damping simulation has been done with euler kinematics and dynamic equations, and the simulation is being redone using quaternion kinematics and dynamics. See folder under Simulations titled Quaternions with most quaternion-implemented simulations.
+The damping simulation has been done with euler kinematics and dynamic equations, and the simulation is being redone using quaternion kinematics and dynamics. See folder under Simulations titled Quaternions with quaternion-implemented simulations.

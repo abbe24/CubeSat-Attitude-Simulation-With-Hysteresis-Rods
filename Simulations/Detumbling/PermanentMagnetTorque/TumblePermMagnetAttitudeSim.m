@@ -52,12 +52,12 @@ opts = setvaropts(opts, "Time_UTCG_", "EmptyFieldRule", "auto");
 
 % Import the data
 % FILEPATH MUST BE CHANGED BASED ON LOCATION OF ISS ORBIT AND MAGNEITC FIELD DATA
-GASRATSOrbitLocationAndMagneticFlux = readtable("C:\GAS\ADCSGITHUB\Simulations\Detumbling\PermanentMagnetTorque\GASRATS Orbit Location and Magnetic Flux.csv", opts);
+GASRATSOrbitLocationAndMagneticFlux = readtable("C:\GAS\ADCSGITHUB\CubeSat-Attitude-Damping-Simulation-With-Hysteresis-Rods-main\Simulations\Detumbling\PermanentMagnetTorque\GASRATS Orbit Location and Magnetic Flux.csv", opts);
 
 %% Clear temporary variables
 clear opts
 
-%--------------------Simulation Start--------------------------------------
+%--------------------Simulation Start-------------------------------------%
 
 %simulation conditions (start, end, timestep, length)
 start_time = datetime(2026,8,1,0,0,0);
@@ -67,6 +67,22 @@ timestep = 1;
 t_days = 1
 t_full = 86400 * t_days
 t_seconds = 0:timestep:t_full;
+
+%-----------------------Magnetic Flux Interpolation-----------------------%
+
+%Set function specific time vector
+B_time = t_seconds(:);
+
+%Create variables for 3 directions of magnetic flux density in ECEF frame
+Bx = GASRATSOrbitLocationAndMagneticFlux.x_Magnitude(:);
+By = GASRATSOrbitLocationAndMagneticFlux.y_Magnitude(:);
+Bz = GASRATSOrbitLocationAndMagneticFlux.z_Magnitude(:);
+
+%Interpolate Magnetic flux density in ECEF frame for use in partial integer
+%steps when in ODE45
+Bx_fun = @(tt) interp1(B_time, Bx, tt, 'linear', 'extrap');
+By_fun = @(tt) interp1(B_time, By, tt, 'linear', 'extrap');
+Bz_fun = @(tt) interp1(B_time, Bz, tt, 'linear', 'extrap');
 
 %%Cubesat Moments of Inertia (based on 1U cubesat) (kg*m^2)
 Ixx = 0.02552;
@@ -90,23 +106,8 @@ wz0 = deg2rad(2);
 %Inital State Vector 
 state0 = [phi0; theta0; psi0; wx0; wy0; wz0];
 
-%%%%%%%%%%%%%%%%%%%%%Permanent Magnet Torque Calculation%%%%%%%%%%%%%%%%%%%
-
-
-
-%-----DELETE IF BROKEN-----------------------------------------------------
-
-%convert earth magnetic field into B vector
-B = [GASRATSOrbitLocationAndMagneticFlux.x_Magnitude, ...
-     GASRATSOrbitLocationAndMagneticFlux.y_Magnitude, ...
-     GASRATSOrbitLocationAndMagneticFlux.z_Magnitude];
-
-%Define Permanent Magnet Magnetic Moment Vector
-%mPerm = [0.3, 0, 0]; %In Body fixed frame
-
-
-%Calculate Torque based on Permanent magnet
-%T_Perm = cross(mP, B);
+%define permanent magnet magnetic moment in Body frame
+mPerm_body = [0.3,0.0,0.0];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%ODE function call%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -117,7 +118,8 @@ B = [GASRATSOrbitLocationAndMagneticFlux.x_Magnitude, ...
 options = odeset('RelTol',1e-7,'AbsTol',1e-7);
 
 %Run ODE45
-[t,x] = ode45(@(t,x) FreeTumble(t,x,I), t_seconds, state0, options);
+[t,x] = ode45(@(t,x) FreeTumble(t,x,I,mPerm_body,Bx_fun,By_fun,Bz_fun), ...
+              t_seconds, state0, options);
 
 %extract Euler angles form ODE45
 phi = x(:,1); %Yaw - z
@@ -232,7 +234,7 @@ disp("Generated STK attitude file: " + filename);
 
 %%%%%%%%%%%%%%%%%%%%%FREE TUMBLE FUNCTION%%%%%%%%%%%%%%%%%%%%%
 
-function dydt = FreeTumble(t, x, I)
+function dydt = FreeTumble(t, x, I, mPerm_body, Bx_fun, By_fun, Bz_fun)
 % Computes the derivative of angular velocity for free tumbling (no torques)
 %x = [phi; theta; psi; wx; wy; wz]
 
@@ -251,6 +253,40 @@ Ixx = I(1);
 Iyy = I(2);
 Izz = I(3);
 
+% magnetic field at solver time t
+B_ECEF_nT = [Bx_fun(t); By_fun(t); Bz_fun(t)];   % 3x1
+%Magnetic field converted from nanoTesla to Tesla
+B_ECEF_T  = 1e-9 * B_ECEF_nT;  
+
+%================FIND SOURCE TO VERIFY DCM=================================
+% ---- DCM from Body to ECEF using 3-2-1 (yaw-pitch-roll) ----
+% If your Euler angles truly represent body wrt ECEF in 3-2-1,
+% then Body->ECEF is:
+Cz = [ cos(phi) -sin(phi) 0;
+       sin(phi)  cos(phi) 0;
+       0         0        1];
+
+Cy = [ cos(theta) 0 sin(theta);
+       0          1 0;
+      -sin(theta) 0 cos(theta)];
+
+Cx = [ 1 0        0;
+       0 cos(psi) -sin(psi);
+       0 sin(psi)  cos(psi)];
+
+%Multiply DCM components into one matrix
+C_ECEF_body = Cz*Cy*Cx;   % 3-2-1
+
+% ---- Define magnetic moment in ECEF frame ----
+mPerm_ECEF = C_ECEF_body * mPerm_body;
+
+% ---- Torque in ECEF ----
+T_ECEF = cross(mPerm_ECEF, B_ECEF_T);
+
+% back to body: T_body = C_ECEF_body' * T_ECEF;
+T_body = C_ECEF_body' * T_ECEF;
+Tx = T_body(1); Ty = T_body(2); Tz = T_body(3);
+
 %---------------------CALCULATE Permanent Magnet Torque--------------------
 
 % 3-2-1 Euler Angle Kinematics (find a source to explain)
@@ -258,17 +294,10 @@ phi_dot = wx + wy * sin(phi) * tan(theta) + wz * cos(phi) * tan(theta);
 theta_dot = wy * cos(phi) - wz * sin(phi);
 psi_dot = (wy * sin(phi) + wz * cos(phi)) / cos(theta);
 
-% Euler rotational equations (no torques)
-wx_dot = (((Iyy - Izz))/Ixx) * wy * wz;
-wy_dot = (((Izz - Ixx))/Iyy) * wz * wx;
-wz_dot = (((Ixx - Iyy))/Izz) * wx * wy;
-
-%{
-ANGULAR VELOCITY RATE CALCULATION WITH PERMANENT MAGNET TORQUE
-wx_dot = ((T_Perm + (Iyy - Izz))/Ixx) * wy * wz;
-wy_dot = ((T_Perm + (Izz - Ixx))/Iyy) * wz * wx;
-wz_dot = ((T_Perm + (Ixx - Iyy))/Izz) * wx * wy;
-%}
+% ---- Euler rotational dynamics WITH torque (body frame) ----
+wx_dot = ((Iyy - Izz)/Ixx)*wy*wz + Tx/Ixx;
+wy_dot = ((Izz - Ixx)/Iyy)*wz*wx + Ty/Iyy;
+wz_dot = ((Ixx - Iyy)/Izz)*wx*wy + Tz/Izz;
 
 %compute the euler rates and angular accalerations
 dydt = [phi_dot; theta_dot; psi_dot; wx_dot; wy_dot; wz_dot];

@@ -1,0 +1,7 @@
+This zip file contains the MATLAB code, Stk simulation and files, reports, and sources for the CDR final detumbling simulation. 
+
+In order to open and view the STK simulation you need to download and unzip the file, then look for the STK Scenario file within the folder (STKFiles), it should have a blue STK logo on the left and it is named (CDRFinalSIm).
+
+within the reports tab you will find a .csv file named (Satellite-GASRATS-To-Facility-USU...) This file contains all access instancs within a 1 week period, totaling in about 7.5 hours of access. or about 1 hour of access a day. These Access windows are around 9 minutes on average. This access is based on a 60 degree cone sensor on the -z axis of the satellite and a ground station object at the latitude and longitude of the USU SER building. 
+
+Within the MATLABCode folder you will find the modified final simulation code which includes the code to write an STK .a attitude file in the format of STK AttitudeTimeQuatAngVels (https://help.agi.com/stk/12.5.0/index.htm#stk/example_AttitudeFile4.htm) This version of the simulation has a timestep decreased from 240 seconds to 10 seconds for increased visual smoothness within the STK 3d window.
